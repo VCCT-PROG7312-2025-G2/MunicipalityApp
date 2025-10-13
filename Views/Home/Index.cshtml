@@ -2,79 +2,149 @@
     ViewData["Title"] = "Main Menu";
 }
 
-<section class="main-menu">
-    <h1 class="mb-1">Main Menu</h1>
+<section class="main-menu" aria-labelledby="menu-heading">
+    <h1 id="menu-heading" class="mb-1">Main Menu</h1>
     <p class="text-muted">Choose a task to continue.</p>
 
-    <div class="card-grid">
-        <!-- Report Issues (enabled) -->
-        <div class="task-card task-card--active">
-            <div>
-                <span class="badge status-active">Active</span>
+    <div class="card-grid" role="list">
+        <!-- Report Issues (active - Part 1) -->
+        <article class="task-card task-card--active" role="listitem">
+            <div class="task-card__body">
+                <span class="badge status-active" aria-label="Feature is active">Active</span>
                 <h3 class="mt-2">Report Issues</h3>
                 <p>Log problems like potholes, water leaks, refuse collection, or outages.</p>
             </div>
-            <div>
-                <a class="btn btn-primary w-100" asp-controller="Issues" asp-action="Create">Open</a>
+            <div class="task-card__cta">
+                <a class="btn btn-primary w-100"
+                   asp-controller="Issues" asp-action="Create"
+                   aria-describedby="report-desc">Open</a>
+                <span id="report-desc" class="visually-hidden">Open the Report Issues task</span>
             </div>
-        </div>
+        </article>
 
-        <!-- Local Events & Announcements (disabled) -->
-        <div class="task-card task-card--disabled" role="button" aria-disabled="true" tabindex="-1">
-            <div>
-                <span class="badge badge-coming">Coming soon</span>
+        <!-- Local Events & Announcements (active - Part 2) -->
+        <article class="task-card task-card--active" role="listitem">
+            <div class="task-card__body">
+                <span class="badge status-active" aria-label="Feature is active">Active</span>
                 <h3 class="mt-2">Local Events &amp; Announcements</h3>
-                <p>Browse upcoming local events and important community notices.</p>
+                <p>Browse upcoming municipal events and important community notices.</p>
             </div>
-            <div>
-                <button class="btn btn-disabled w-100" disabled title="This feature will be implemented later">
-                    Disabled
-                </button>
+            <div class="task-card__cta">
+                <a class="btn btn-primary w-100"
+                   asp-controller="Events" asp-action="Index"
+                   aria-describedby="events-desc">Open</a>
+                <span id="events-desc" class="visually-hidden">Open Local Events and Announcements</span>
             </div>
-        </div>
+        </article>
 
-        <!-- Service Request Status (disabled) -->
-        <div class="task-card task-card--disabled" role="button" aria-disabled="true" tabindex="-1">
-            <div>
-                <span class="badge badge-coming">Coming soon</span>
+        <!-- Service Request Status (present but disabled until Task 3) -->
+        <article class="task-card task-card--disabled" role="listitem" aria-disabled="true" tabindex="-1">
+            <div class="task-card__body">
+                <span class="badge badge-coming" aria-label="Coming soon">Coming soon</span>
                 <h3 class="mt-2">Service Request Status</h3>
-                <p>Track progress of previously submitted requests with unique IDs.</p>
+                <p>Track the progress of previously submitted requests using your reference number.</p>
             </div>
-            <div>
-                <button class="btn btn-disabled w-100" disabled title="This feature will be implemented later">
+            <div class="task-card__cta">
+                <button class="btn btn-disabled w-100" disabled
+                        title="This feature will be implemented in Task 3">
                     Disabled
                 </button>
             </div>
-        </div>
+        </article>
     </div>
 </section>
 
 <style>
-    /* Layout */
-    .main-menu { padding: 2rem 1rem; }
+    /* A11y helper */
+    .visually-hidden {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0,0,0,0) !important;
+        border: 0 !important;
+    }
+
+    .main-menu {
+        padding: 2rem 1rem;
+    }
+
     .card-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1rem;
     }
 
-    /* Cards */
     .task-card {
-        display: flex; justify-content: space-between; align-items: flex-start;
-        gap: 1rem; padding: 1rem 1.25rem; min-height: 120px;
-        border: 1px solid #e5e7eb; border-radius: 14px; background: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        min-height: 140px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        background: #fff;
         box-shadow: 0 1px 2px rgba(16,24,40,0.06);
-    }
-    .task-card--active { transition: transform .08s ease, box-shadow .08s ease; }
-    .task-card--active:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(16,24,40,0.08); }
-    .task-card--disabled {
-        background: #f8fafc; color: #9aa4b2; border-style: dashed;
-        border-color: #e5e7eb; user-select: none; pointer-events: none;
+        outline: none;
     }
 
-    /* Badges & buttons */
-    .badge { display: inline-block; font-size: .75rem; padding: .15rem .5rem; border-radius: 999px; }
-    .status-active { background: #e6f4ea; color: #0f5132; border: 1px solid #badbcc; }
-    .badge-coming { background: #e5e7eb; color: #374151; border: 1px solid #d1d5db; }
-    .btn-disabled { background: #e5e7eb; color: #6b7280; border-color: #e5e7eb; cursor: not-allowed; }
+        .task-card:focus-within {
+            box-shadow: 0 0 0 3px rgba(37,99,235,.25);
+        }
+
+    .task-card__body {
+        max-width: 70%;
+    }
+
+    .task-card__cta {
+        width: 220px;
+        max-width: 35%;
+        align-self: center;
+    }
+
+    .task-card--active {
+        transition: transform .08s ease, box-shadow .08s ease;
+    }
+
+        .task-card--active:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(16,24,40,0.08);
+        }
+
+    .task-card--disabled {
+        background: #f8fafc;
+        color: #9aa4b2;
+        border-style: dashed;
+        border-color: #e5e7eb;
+        user-select: none;
+    }
+
+        .task-card--disabled .btn-disabled {
+            background: #e5e7eb;
+            color: #6b7280;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+
+    .badge {
+        display: inline-block;
+        font-size: .75rem;
+        padding: .15rem .5rem;
+        border-radius: 999px;
+    }
+
+    .status-active {
+        background: #e6f4ea;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+
+    .badge-coming {
+        background: #e5e7eb;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
 </style>
