@@ -1,0 +1,11 @@
+﻿@model MunicipalityApp.Models.EventItem
+@{
+    ViewData["Title"] = "Event Details";
+}
+<h1 class="mb-3">@Model.Title</h1>
+<p class="text-muted">@Model.Category • @Model.Date.ToString("yyyy-MM-dd") @Model.Time • @Model.Venue</p>
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <p>@Model.Description</p>
+}
+<a class="btn btn-outline-secondary" asp-action="Index">Back to Events</a>

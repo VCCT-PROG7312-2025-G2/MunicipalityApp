@@ -1,0 +1,88 @@
+﻿@model List<MunicipalityApp.Models.EventItem>
+@{
+    ViewData["Title"] = "Local Events & Announcements";
+    var cats = (IReadOnlyCollection<string>)(ViewBag.Categories ?? Array.Empty<string>());
+    var rec = (IReadOnlyList<string>)(ViewBag.Recommendations ?? Array.Empty<string>());
+    var soon = (IEnumerable<MunicipalityApp.Models.EventItem>)(ViewBag.Soonest ?? Enumerable.Empty<MunicipalityApp.Models.EventItem>());
+}
+
+<section class="mt-3">
+    <h1 class="mb-2">Local Events &amp; Announcements</h1>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-sm-5">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select">
+                <option value="">All categories</option>
+                @foreach (var c in cats)
+                {
+                    <option value="@c">@c</option>
+                }
+            </select>
+        </div>
+        <div class="col-sm-4">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" />
+        </div>
+        <div class="col-sm-3">
+            <label class="form-label d-block">&nbsp;</label>
+            <button class="btn btn-primary w-100" type="submit">Search</button>
+        </div>
+    </form>
+
+    @if (rec.Count > 0)
+    {
+        <div class="alert alert-info" role="status">
+            <strong>Recommended:</strong> @string.Join(", ", rec)
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            @if (Model.Count == 0)
+            {
+                <p class="text-muted">No events found for your filters.</p>
+            }
+            else
+            {
+                <ul class="list-group">
+                    @foreach (var e in Model)
+                    {
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>@e.Title</strong> — @e.Category<br />
+                                    <small>@e.Date.ToString("yyyy-MM-dd") @e.Time — @e.Venue</small>
+                                    @if (!string.IsNullOrWhiteSpace(e.Description))
+                                    {
+                                        <div class="text-muted small">@e.Description</div>
+                                    }
+                                </div>
+                                <div>
+                                    <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@e.Id">Details</a>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="col-lg-4 mt-3 mt-lg-0">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-2">Coming up</h5>
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var e in soon)
+                        {
+                            <li class="mb-2">
+                                <strong>@e.Date.ToString("dd MMM")</strong> — @e.Title
+                                <div class="text-muted small">@e.Time • @e.Venue</div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

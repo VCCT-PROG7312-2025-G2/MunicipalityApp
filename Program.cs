@@ -6,8 +6,13 @@ namespace MunicipalityApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // ...
             builder.Services.AddControllersWithViews();
             builder.Services.AddSingleton<MunicipalityApp.Services.IIssueStore, MunicipalityApp.Services.IssueStore>();
+            builder.Services.AddSingleton<MunicipalityApp.Services.IEventStore, MunicipalityApp.Services.EventStore>(); // NEW
+                                                                                                                        // ...
+
+
 
 
             var app = builder.Build();
