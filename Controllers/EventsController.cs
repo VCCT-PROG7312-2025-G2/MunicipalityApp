@@ -15,8 +15,9 @@ namespace MunicipalityApp.Controllers
             _log = log;
         }
 
+        // Increment 2: pagination added
         [HttpGet]
-        public IActionResult Index(string? category, string? date)
+        public IActionResult Index(string? category, string? date, int page = 1, int size = 10)
         {
             _events.SeedIfEmpty();
 
@@ -28,14 +29,28 @@ namespace MunicipalityApp.Controllers
             // Telemetry for recommendations
             _events.RecordSearch(category);
 
-            var results = _events.Search(category, parsedDate);
+            var all = _events.Search(category, parsedDate).ToList();
+
+            // clamp & paginate
+            size = Math.Clamp(size, 5, 50);
+            var total = all.Count;
+            var pages = Math.Max(1, (int)Math.Ceiling(total / (double)size));
+            page = Math.Clamp(page, 1, pages);
+            var items = all.Skip((page - 1) * size).Take(size).ToList();
+
             ViewBag.Categories = _events.Categories;
             ViewBag.Recommendations = _events.GetRecommendations(3);
             ViewBag.Soonest = _events.GetSoonest(3);
+            ViewBag.RecentlyViewed = _events.GetRecentlyViewed(5); // NEW
 
-            _log.LogInformation("Events search category={Category} date={Date}", category, parsedDate?.ToString("yyyy-MM-dd"));
+            // expose paging/filter in ViewBag for UI
+            ViewBag.Page = page; ViewBag.Pages = pages; ViewBag.Size = size; ViewBag.Total = total;
+            ViewBag.Category = category ?? ""; ViewBag.Date = date ?? "";
 
-            return View(results.ToList());
+            _log.LogInformation("Events search category={Category} date={Date} page={Page} size={Size}",
+                category, parsedDate?.ToString("yyyy-MM-dd"), page, size);
+
+            return View(items);
         }
 
         [HttpGet]
@@ -43,6 +58,10 @@ namespace MunicipalityApp.Controllers
         {
             var e = _events.GetById(id);
             if (e is null) return NotFound();
+
+            // Increment 2: record view for Stack-backed "Recently viewed"
+            _events.RecordViewed(e.Id);
+
             return View(e);
         }
     }

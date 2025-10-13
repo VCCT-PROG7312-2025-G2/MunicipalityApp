@@ -2,8 +2,15 @@
 @{
     ViewData["Title"] = "Local Events & Announcements";
     var cats = (IReadOnlyCollection<string>)(ViewBag.Categories ?? Array.Empty<string>());
-    var rec = (IReadOnlyList<string>)(ViewBag.Recommendations ?? Array.Empty<string>());
+    var rec  = (IReadOnlyList<string>)(ViewBag.Recommendations ?? Array.Empty<string>());
     var soon = (IEnumerable<MunicipalityApp.Models.EventItem>)(ViewBag.Soonest ?? Enumerable.Empty<MunicipalityApp.Models.EventItem>());
+    var rv   = (IReadOnlyList<MunicipalityApp.Models.EventItem>)(ViewBag.RecentlyViewed ?? Array.Empty<MunicipalityApp.Models.EventItem>());
+
+    int page = (int)(ViewBag.Page ?? 1), pages = (int)(ViewBag.Pages ?? 1), size = (int)(ViewBag.Size ?? 10);
+    string cat = (string)(ViewBag.Category ?? ""), dateVal = (string)(ViewBag.Date ?? "");
+
+    bool isFirst = page <= 1;
+    bool isLast  = page >= pages;
 }
 
 <section class="mt-3">
@@ -16,13 +23,20 @@
                 <option value="">All categories</option>
                 @foreach (var c in cats)
                 {
-                    <option value="@c">@c</option>
+                    if (string.Equals(c, cat, StringComparison.OrdinalIgnoreCase))
+                    {
+                        <option value="@c" selected="selected">@c</option>
+                    }
+                    else
+                    {
+                        <option value="@c">@c</option>
+                    }
                 }
             </select>
         </div>
         <div class="col-sm-4">
             <label class="form-label">Date</label>
-            <input type="date" name="date" class="form-control" />
+            <input type="date" name="date" class="form-control" value="@dateVal" />
         </div>
         <div class="col-sm-3">
             <label class="form-label d-block">&nbsp;</label>
@@ -32,7 +46,7 @@
 
     @if (rec.Count > 0)
     {
-        <div class="alert alert-info" role="status">
+        <div class="alert alert-info" role="status" aria-live="polite">
             <strong>Recommended:</strong> @string.Join(", ", rec)
         </div>
     }
@@ -65,6 +79,31 @@
                         </li>
                     }
                 </ul>
+
+                @* Simple pager *@
+                @if (pages > 1)
+                {
+                    <nav class="mt-3" aria-label="Events pages">
+                        <ul class="pagination">
+                            <li class="page-item @(isFirst ? "disabled" : "")">
+                                <a class="page-link"
+                                   href="@Url.Action("Index", "Events", new { category = cat, date = dateVal, page = page - 1, size = size })">
+                                   Previous
+                                </a>
+                            </li>
+                            <li class="page-item disabled">
+                                <span class="page-link">Page @(page) of @(pages)</span>
+
+                            </li>
+                            <li class="page-item @(isLast ? "disabled" : "")">
+                                <a class="page-link"
+                                   href="@Url.Action("Index", "Events", new { category = cat, date = dateVal, page = page + 1, size = size })">
+                                   Next
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             }
         </div>
 
@@ -81,6 +120,28 @@
                             </li>
                         }
                     </ul>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-2">Recently viewed</h5>
+                    @if (rv.Count == 0)
+                    {
+                        <div class="text-muted small">No items yet.</div>
+                    }
+                    else
+                    {
+                        <ul class="list-unstyled mb-0">
+                            @foreach (var e in rv)
+                            {
+                                <li class="mb-2">
+                                    <a asp-action="Details" asp-route-id="@e.Id"><strong>@e.Title</strong></a>
+                                    <div class="text-muted small">@e.Date.ToString("dd MMM") • @e.Category</div>
+                                </li>
+                            }
+                        </ul>
+                    }
                 </div>
             </div>
         </div>

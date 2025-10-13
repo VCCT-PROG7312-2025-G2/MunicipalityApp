@@ -14,6 +14,9 @@ namespace MunicipalityApp.Services
         private readonly Dictionary<string, int> _categoryHits = new(StringComparer.OrdinalIgnoreCase); // Dictionary
         private readonly PriorityQueue<EventItem, DateTime> _soonest = new(); // PriorityQueue
 
+        // NEW: Stack for recently viewed
+        private readonly Stack<Guid> _recentlyViewed = new(); // Stack
+
         private readonly Dictionary<Guid, EventItem> _byId = new(); // fast lookup
         private readonly object _gate = new();
 
@@ -77,6 +80,25 @@ namespace MunicipalityApp.Services
             }
         }
 
+        // NEW: Stack-backed "Recently viewed"
+        public IReadOnlyList<EventItem> GetRecentlyViewed(int count)
+        {
+            lock (_gate)
+            {
+                var seen = new HashSet<Guid>();
+                var list = new List<EventItem>(Math.Max(0, count));
+                foreach (var id in _recentlyViewed) // newest -> oldest
+                {
+                    if (seen.Add(id) && _byId.TryGetValue(id, out var e))
+                    {
+                        list.Add(e);
+                        if (list.Count == count) break;
+                    }
+                }
+                return list;
+            }
+        }
+
         public EventItem? GetById(Guid id)
         {
             lock (_gate) return _byId.TryGetValue(id, out var e) ? e : null;
@@ -90,6 +112,22 @@ namespace MunicipalityApp.Services
                 _recentSearches.Enqueue(category);
                 _categoryHits[category] = _categoryHits.GetValueOrDefault(category) + 1;
                 while (_recentSearches.Count > 40) _recentSearches.Dequeue();
+            }
+        }
+
+        // NEW: push onto Stack and trim occasionally
+        public void RecordViewed(Guid id)
+        {
+            lock (_gate)
+            {
+                if (_byId.ContainsKey(id)) _recentlyViewed.Push(id);
+                if (_recentlyViewed.Count > 200)
+                {
+                    // keep the most recent ~100
+                    var keep = new Stack<Guid>(_recentlyViewed.Take(100).Reverse());
+                    _recentlyViewed.Clear();
+                    foreach (var x in keep) _recentlyViewed.Push(x);
+                }
             }
         }
 

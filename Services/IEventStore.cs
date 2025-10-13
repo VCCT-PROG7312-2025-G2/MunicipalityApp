@@ -11,6 +11,11 @@ namespace MunicipalityApp.Services
         IReadOnlyCollection<string> Categories { get; }
         IReadOnlyList<string> GetRecommendations(int count);
         IEnumerable<EventItem> GetSoonest(int count);
+
+        // NEW in Increment 2
+        IReadOnlyList<EventItem> GetRecentlyViewed(int count);
+        void RecordViewed(Guid id);
+
         EventItem? GetById(Guid id);
         void RecordSearch(string? category);
     }
