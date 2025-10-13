@@ -1,7 +1,9 @@
 ﻿@model MunicipalityApp.Models.IssueInput
 @{
     ViewData["Title"] = "Report an Issue";
-    var categories = (IEnumerable<string>)ViewBag.Categories;
+    var categories = ViewBag.Categories as IEnumerable<string>
+                 ?? new[] { "Sanitation", "Roads", "Water", "Electricity", "Refuse Collection", "Other" };
+
 }
 
 <h1 class="mb-1">Report an Issue</h1>

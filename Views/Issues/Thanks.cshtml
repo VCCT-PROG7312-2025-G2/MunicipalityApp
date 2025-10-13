@@ -18,23 +18,21 @@
     <div><strong>Status:</strong> @Model.Status</div>
 
     <div class="mt-3">
-    <span class="badge bg-info text-dark">Current Status: @Model.Status</span>
-</div>
-
-<div class="progress my-2" style="height:8px;">
-    <div class="progress-bar" role="progressbar"
-         style="width:@(Model.Status switch {
-             MunicipalityApp.Models.IssueStatus.Submitted => "25%",
-             MunicipalityApp.Models.IssueStatus.Assigned => "50%",
-             MunicipalityApp.Models.IssueStatus.InProgress => "75%",
-             MunicipalityApp.Models.IssueStatus.Resolved => "100%",
-             _ => "25%"
-         })">
+        <span class="badge bg-info text-dark">Current Status: @Model.Status</span>
     </div>
-</div>
-<small class="text-muted">Submitted → Assigned → In Progress → Resolved</small>
 
-//
+    <div class="progress my-2" style="height:8px;">
+        <div class="progress-bar" role="progressbar"
+            style="width:@(Model.Status switch {
+                MunicipalityApp.Models.IssueStatus.Submitted => "25%",
+                MunicipalityApp.Models.IssueStatus.Assigned => "50%",
+                MunicipalityApp.Models.IssueStatus.InProgress => "75%",
+                MunicipalityApp.Models.IssueStatus.Resolved => "100%",
+                _ => "25%"
+            })">
+        </div>
+    </div>
+    <small class="text-muted">Submitted → Assigned → In Progress → Resolved</small>
 </div>
 
 @if (Model.Attachments.Count > 0)
@@ -43,7 +41,11 @@
     <ul>
         @foreach (var a in Model.Attachments)
         {
-            <li><a href="@a.StoredPath" target="_blank">@a.FileName</a> (@(Math.Round(a.SizeBytes / 1024.0, 1)) KB)</li>
+            <li>
+                <a asp-action="Download" asp-route-id="@Model.Id" asp-route-fileId="@a.Id">
+                    @a.OriginalFileName (@(Math.Round(a.SizeBytes / 1024.0, 1)) KB)
+                </a>
+            </li>
         }
     </ul>
 }
