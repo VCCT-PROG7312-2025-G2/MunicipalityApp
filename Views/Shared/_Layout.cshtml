@@ -7,22 +7,109 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MunicipalityApp.styles.css" asp-append-version="true" />
+    <meta name="theme-color" content="#0d6efd" />
+
+    <style>
+        /* --- Navbar brand card --- */
+        .brand-card {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .35rem .6rem;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(16,24,40,0.06), 0 3px 8px rgba(16,24,40,0.06);
+            /* keep it compact and visually anchored to the far-left */
+            margin: 0;
+        }
+        /* Bigger logo for visibility; fills the card visually */
+        .brand-logo {
+            height: 72px; /* bigger logo */
+            width: 72px; /* square footprint so it visually "fills" the card */
+            object-fit: contain;
+            display: block;
+        }
+
+        .brand-text {
+            line-height: 1.1;
+        }
+
+            .brand-text .title {
+                font-size: 1rem;
+                font-weight: 600;
+                margin: 0;
+                color: #111827; /* dark for contrast */
+            }
+
+            .brand-text .subtitle {
+                font-size: .78rem;
+                margin: .1rem 0 0 0;
+                color: #374151; /* readable on white */
+                opacity: .85;
+            }
+
+        /* make sure the brand hugs the far-left; push nav links to the right */
+        .navbar .navbar-brand {
+            padding: 0;
+            margin-right: 1rem; /* small breathing room before the links/toggler */
+        }
+
+        .navbar .navbar-nav.ms-auto > .nav-item > .nav-link {
+            color: #fff;
+        }
+
+        .container-narrow {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .footer-note {
+            color: #6c757d;
+            font-size: .9rem;
+            margin: 1rem 0 2rem 0;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm">
+        <!-- Themed navbar so the burger (toggler) icon is always visible -->
+        <nav class="navbar navbar-expand-sm navbar-dark bg-primary shadow-sm">
             <div class="container">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">MunicipalityApp</a>
-                <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+
+                <!-- City of Nova branding card: fixed to the FAR LEFT -->
+                <a class="navbar-brand text-reset text-decoration-none"
+                   asp-controller="Home" asp-action="Index"
+                   aria-label="City of Nova home">
+                    <div class="brand-card">
+                        <img class="brand-logo" src="~/images/city-of-nova-logo.png" asp-append-version="true" alt="City of Nova logo" />
+                        <div class="brand-text">
+                            <p class="title">City of Nova</p>
+                            <p class="subtitle">Municipal Services • Community Notices • Local Events</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Accessible toggler targeting #mainNavbar -->
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Issues" asp-action="Create">Report Issues</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Events" asp-action="Index">Events</a></li> <!-- NEW -->
-                    </ul>
 
+                <!-- nav links pushed to the right -->
+                <div class="collapse navbar-collapse ms-sm-3" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Issues" asp-action="Create">Report Issues</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Events" asp-action="Index">Events</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
@@ -32,13 +119,13 @@
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
-        <p class="footer-note">MunicipalityApp · Improving service delivery through citizen engagement</p>
+        <p class="footer-note">City of Nova · Improving service delivery through citizen engagement</p>
     </div>
+
+    <!-- NOTE for pagers: use <span class="page-link"> inside disabled <li class="page-item disabled"> -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
-
 </body>
-
 </html>

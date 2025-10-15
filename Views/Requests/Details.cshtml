@@ -1,0 +1,49 @@
+﻿@model MunicipalityApp.Models.IssueReport
+@{
+    ViewData["Title"] = "Request Details";
+}
+<h1 class="mb-2">Request Details</h1>
+<p class="text-muted">Reference: <strong class="text-monospace">@Model.Id</strong></p>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6"><strong>Submitted:</strong> @Model.CreatedAt.ToLocalTime()</div>
+      <div class="col-md-6"><strong>Status:</strong>
+        <span class="badge @(Model.Status switch {
+            MunicipalityApp.Models.IssueStatus.Submitted => "bg-secondary",
+            MunicipalityApp.Models.IssueStatus.Assigned => "bg-info text-dark",
+            MunicipalityApp.Models.IssueStatus.InProgress => "bg-warning text-dark",
+            MunicipalityApp.Models.IssueStatus.Resolved => "bg-success",
+            _ => "bg-secondary"
+        })">@Model.Status</span>
+      </div>
+    </div>
+    <div class="row mt-2">
+      <div class="col-md-6"><strong>Category:</strong> @Model.Category</div>
+      <div class="col-md-6"><strong>Location:</strong> @Model.Location</div>
+    </div>
+    <div class="mt-3">
+      <strong>Description</strong>
+      <p class="mb-0">@Model.Description</p>
+    </div>
+  </div>
+</div>
+
+@if (Model.Attachments.Count > 0)
+{
+  <h5>Attachments</h5>
+  <ul>
+    @foreach (var a in Model.Attachments)
+    {
+      <li>
+        <a asp-controller="Issues" asp-action="Download" asp-route-id="@Model.Id" asp-route-fileId="@a.Id">
+            @a.OriginalFileName (@(Math.Round(a.SizeBytes / 1024.0, 1)) KB)
+        </a>
+      </li>
+    }
+  </ul>
+}
+
+<a class="btn btn-outline-secondary" asp-action="Index">Back to Status</a>
+<a class="btn btn-primary" asp-controller="Issues" asp-action="Create">Report another issue</a>

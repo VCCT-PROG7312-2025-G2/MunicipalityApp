@@ -1,0 +1,149 @@
+﻿@model List<MunicipalityApp.Models.IssueReport>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Service Request Status";
+
+    var statuses = (IEnumerable<string>)(ViewBag.Statuses ?? Array.Empty<string>());
+    var cats = (IEnumerable<string>)(ViewBag.Categories ?? Array.Empty<string>());
+
+    string q = (string)(ViewBag.Query ?? "");
+    string status = (string)(ViewBag.Status ?? "");
+    string category = (string)(ViewBag.Category ?? "");
+    string from = (string)(ViewBag.From ?? "");
+    string to = (string)(ViewBag.To ?? "");
+    string sort = (string)(ViewBag.Sort ?? "recent");
+
+    int curPage = (int)(ViewBag.Page ?? 1);
+    int totalPages = (int)(ViewBag.Pages ?? 1);
+    int size = (int)(ViewBag.Size ?? 10);
+    int total = (int)(ViewBag.Total ?? 0);
+
+    bool isFirst = curPage <= 1;
+    bool isLast  = curPage >= totalPages;
+}
+
+<section class="mt-3">
+    <h1 class="mb-2">Service Request Status</h1>
+    <p class="text-muted">Track progress of submitted issues. Use filters to refine your view.</p>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-3">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" class="form-control" value="@q" placeholder="Location or description..." />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            @Html.DropDownList(
+                "status",
+                new SelectList(statuses, status),
+                "All statuses",
+                new { @class = "form-select" }
+            )
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Category</label>
+            @Html.DropDownList(
+                "category",
+                new SelectList(cats, category),
+                "All categories",
+                new { @class = "form-select" }
+            )
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">From</label>
+            <input type="date" name="from" value="@from" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">To</label>
+            <input type="date" name="to" value="@to" class="form-control" />
+        </div>
+        <div class="col-md-1">
+            <label class="form-label d-block"> </label>
+            <button class="btn btn-primary w-100" type="submit">Filter</button>
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="text-muted">
+            Showing <strong>@Model.Count</strong> of <strong>@total</strong>
+        </div>
+        <div>
+            <div class="btn-group" role="group" aria-label="Sort">
+                <a class="btn btn-sm @(sort=="recent" ? "btn-primary" : "btn-outline-primary")"
+                   href="@Url.Action("Index","Requests", new { q, status, category, from, to, sort="recent", page=1, size })">Most recent</a>
+                <a class="btn btn-sm @(sort=="oldest" ? "btn-primary" : "btn-outline-primary")"
+                   href="@Url.Action("Index","Requests", new { q, status, category, from, to, sort="oldest", page=1, size })">Oldest</a>
+                <a class="btn btn-sm @(sort=="status" ? "btn-primary" : "btn-outline-primary")"
+                   href="@Url.Action("Index","Requests", new { q, status, category, from, to, sort="status", page=1, size })">By status</a>
+                <a class="btn btn-sm @(sort=="category" ? "btn-primary" : "btn-outline-primary")"
+                   href="@Url.Action("Index","Requests", new { q, status, category, from, to, sort="category", page=1, size })">By category</a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <p class="text-muted">No requests found for your filters.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var it in Model)
+                {
+                    <tr>
+                        <td class="text-monospace">@it.Id</td>
+                        <td>@it.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            <span class="badge @(it.Status switch {
+                                MunicipalityApp.Models.IssueStatus.Submitted => "bg-secondary",
+                                MunicipalityApp.Models.IssueStatus.Assigned => "bg-info text-dark",
+                                MunicipalityApp.Models.IssueStatus.InProgress => "bg-warning text-dark",
+                                MunicipalityApp.Models.IssueStatus.Resolved => "bg-success",
+                                _ => "bg-secondary"
+                            })">@it.Status</span>
+                        </td>
+                        <td>@it.Category</td>
+                        <td>@it.Location</td>
+                        <td class="text-truncate" style="max-width:320px">@it.Description</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@it.Id">View</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <nav class="mt-2" aria-label="Requests pages">
+                <ul class="pagination">
+                    <li class="page-item @(isFirst ? "disabled" : "")">
+                        <a class="page-link"
+                           href="@Url.Action("Index","Requests", new { q, status, category, from, to, sort, page = curPage - 1, size })">Previous</a>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Page @(curPage) of @(totalPages)</span>
+                    </li>
+                    <li class="page-item @(isLast ? "disabled" : "")">
+                        <a class="page-link"
+                           href="@Url.Action("Index","Requests", new { q, status, category, from, to, sort, page = curPage + 1, size })">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+</section>

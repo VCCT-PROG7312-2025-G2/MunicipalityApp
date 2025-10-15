@@ -1,16 +1,19 @@
 ﻿@model List<MunicipalityApp.Models.EventItem>
+@using System.Linq
+
 @{
     ViewData["Title"] = "Local Events & Announcements";
     var cats = (IReadOnlyCollection<string>)(ViewBag.Categories ?? Array.Empty<string>());
-    var rec  = (IReadOnlyList<string>)(ViewBag.Recommendations ?? Array.Empty<string>());
+    var rec = (IReadOnlyList<string>)(ViewBag.Recommendations ?? Array.Empty<string>());
     var soon = (IEnumerable<MunicipalityApp.Models.EventItem>)(ViewBag.Soonest ?? Enumerable.Empty<MunicipalityApp.Models.EventItem>());
-    var rv   = (IReadOnlyList<MunicipalityApp.Models.EventItem>)(ViewBag.RecentlyViewed ?? Array.Empty<MunicipalityApp.Models.EventItem>());
+    var rv = (IReadOnlyList<MunicipalityApp.Models.EventItem>)(ViewBag.RecentlyViewed ?? Array.Empty<MunicipalityApp.Models.EventItem>());
+    var recEvents = (IEnumerable<MunicipalityApp.Models.EventItem>)(ViewBag.RecommendedEvents ?? Enumerable.Empty<MunicipalityApp.Models.EventItem>());
 
     int page = (int)(ViewBag.Page ?? 1), pages = (int)(ViewBag.Pages ?? 1), size = (int)(ViewBag.Size ?? 10);
     string cat = (string)(ViewBag.Category ?? ""), dateVal = (string)(ViewBag.Date ?? "");
 
     bool isFirst = page <= 1;
-    bool isLast  = page >= pages;
+    bool isLast = page >= pages;
 }
 
 <section class="mt-3">
@@ -47,7 +50,26 @@
     @if (rec.Count > 0)
     {
         <div class="alert alert-info" role="status" aria-live="polite">
-            <strong>Recommended:</strong> @string.Join(", ", rec)
+            <strong>Recommended categories:</strong> @string.Join(", ", rec)
+        </div>
+    }
+
+    @* NEW: Recommended concrete events *@
+    @if (recEvents.Any())
+    {
+        <div class="card mt-2 mb-3">
+            <div class="card-body">
+                <h5 class="card-title mb-2">Recommended for you</h5>
+                <ul class="list-unstyled mb-0">
+                    @foreach (var e in recEvents)
+                    {
+                        <li class="mb-2">
+                            <a asp-action="Details" asp-route-id="@e.Id"><strong>@e.Title</strong></a>
+                            <div class="text-muted small">@e.Date.ToString("dd MMM") @e.Time • @e.Category • @e.Venue</div>
+                        </li>
+                    }
+                </ul>
+            </div>
         </div>
     }
 
@@ -59,6 +81,10 @@
             }
             else
             {
+                <div class="text-muted mb-2">
+                    Showing <strong>@Model.Count</strong> of <strong>@(ViewBag.Total ?? 0)</strong>
+                </div>
+
                 <ul class="list-group">
                     @foreach (var e in Model)
                     {
@@ -66,7 +92,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <strong>@e.Title</strong> — @e.Category<br />
-                                    <small>@e.Date.ToString("yyyy-MM-dd") @e.Time — @e.Venue</small>
+                                    <small>@e.Date.ToString("yyyy-MM-dd") @e.Time.ToString("HH:mm") — @e.Venue</small>
                                     @if (!string.IsNullOrWhiteSpace(e.Description))
                                     {
                                         <div class="text-muted small">@e.Description</div>
@@ -80,27 +106,45 @@
                     }
                 </ul>
 
-                @* Simple pager *@
                 @if (pages > 1)
                 {
                     <nav class="mt-3" aria-label="Events pages">
                         <ul class="pagination">
-                            <li class="page-item @(isFirst ? "disabled" : "")">
-                                <a class="page-link"
-                                   href="@Url.Action("Index", "Events", new { category = cat, date = dateVal, page = page - 1, size = size })">
-                                   Previous
-                                </a>
-                            </li>
+                            @if (isFirst)
+                            {
+                                <li class="page-item disabled" aria-disabled="true">
+                                    <span class="page-link" tabindex="-1">Previous</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="@Url.Action("Index", "Events", new { category = cat, date = dateVal, page = page - 1, size = size })">
+                                        Previous
+                                    </a>
+                                </li>
+                            }
+
                             <li class="page-item disabled">
                                 <span class="page-link">Page @(page) of @(pages)</span>
+                            </li>
 
-                            </li>
-                            <li class="page-item @(isLast ? "disabled" : "")">
-                                <a class="page-link"
-                                   href="@Url.Action("Index", "Events", new { category = cat, date = dateVal, page = page + 1, size = size })">
-                                   Next
-                                </a>
-                            </li>
+                            @if (isLast)
+                            {
+                                <li class="page-item disabled" aria-disabled="true">
+                                    <span class="page-link" tabindex="-1">Next</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link"
+                                       href="@Url.Action("Index", "Events", new { category = cat, date = dateVal, page = page + 1, size = size })">
+                                        Next
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </nav>
                 }
@@ -116,7 +160,7 @@
                         {
                             <li class="mb-2">
                                 <strong>@e.Date.ToString("dd MMM")</strong> — @e.Title
-                                <div class="text-muted small">@e.Time • @e.Venue</div>
+                                <div class="text-muted small">@e.Time.ToString("HH:mm") • @e.Venue</div>
                             </li>
                         }
                     </ul>

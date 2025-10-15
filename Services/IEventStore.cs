@@ -7,16 +7,22 @@ namespace MunicipalityApp.Services
     public interface IEventStore
     {
         void SeedIfEmpty();
+
+        // Core querying
         IEnumerable<EventItem> Search(string? category, DateOnly? date);
+        EventItem? GetById(Guid id);
+
+        // Metadata / panels
         IReadOnlyCollection<string> Categories { get; }
         IReadOnlyList<string> GetRecommendations(int count);
         IEnumerable<EventItem> GetSoonest(int count);
-
-        // NEW in Increment 2
         IReadOnlyList<EventItem> GetRecentlyViewed(int count);
+
+        // Telemetry
+        void RecordSearch(string? category);
         void RecordViewed(Guid id);
 
-        EventItem? GetById(Guid id);
-        void RecordSearch(string? category);
+        // NEW: concrete event recommendations
+        IEnumerable<EventItem> GetRecommendedEvents(int count, string? seedCategory = null);
     }
 }
