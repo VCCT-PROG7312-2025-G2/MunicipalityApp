@@ -9,7 +9,10 @@
 }
 
 <h1 class="mb-1">Thank you for your report</h1>
-<p class="text-muted">Your reference number is <strong>@Model.Id</strong>.</p>
+<p class="text-muted">
+    Your reference number is
+    <strong class="text-monospace">@Model.Id</strong>.
+</p>
 
 <div class="card p-3 mb-3">
     <div><strong>Location:</strong> @Model.Location</div>
@@ -23,13 +26,13 @@
 
     <div class="progress my-2" style="height:8px;">
         <div class="progress-bar" role="progressbar"
-            style="width:@(Model.Status switch {
-                MunicipalityApp.Models.IssueStatus.Submitted => "25%",
-                MunicipalityApp.Models.IssueStatus.Assigned => "50%",
-                MunicipalityApp.Models.IssueStatus.InProgress => "75%",
-                MunicipalityApp.Models.IssueStatus.Resolved => "100%",
-                _ => "25%"
-            })">
+             style="width:@(Model.Status switch {
+                 MunicipalityApp.Models.IssueStatus.Submitted => "25%",
+                 MunicipalityApp.Models.IssueStatus.Assigned => "50%",
+                 MunicipalityApp.Models.IssueStatus.InProgress => "75%",
+                 MunicipalityApp.Models.IssueStatus.Resolved => "100%",
+                 _ => "25%"
+             })">
         </div>
     </div>
     <small class="text-muted">Submitted → Assigned → In Progress → Resolved</small>
@@ -50,5 +53,15 @@
     </ul>
 }
 
-<a class="btn btn-primary" asp-controller="Issues" asp-action="Create">Report another issue</a>
-<a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Back to Main Menu</a>
+<div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-success"
+       asp-controller="Requests" asp-action="Details" asp-route-id="@Model.Id">
+        Track this request
+    </a>
+    <a class="btn btn-primary" asp-controller="Issues" asp-action="Create">
+        Report another issue
+    </a>
+    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">
+        Back to Main Menu
+    </a>
+</div>

@@ -37,18 +37,18 @@
             </div>
         </article>
 
-        <!-- Service Request Status (present but disabled until Task 3) -->
-        <article class="task-card task-card--disabled" role="listitem" aria-disabled="true" tabindex="-1">
+        <!-- Service Request Status (now active - Part 3) -->
+        <article class="task-card task-card--active" role="listitem">
             <div class="task-card__body">
-                <span class="badge badge-coming" aria-label="Coming soon">Coming soon</span>
+                <span class="badge status-active" aria-label="Feature is active">Active</span>
                 <h3 class="mt-2">Service Request Status</h3>
                 <p>Track the progress of previously submitted requests using your reference number.</p>
             </div>
             <div class="task-card__cta">
-                <button class="btn btn-disabled w-100" disabled
-                        title="This feature will be implemented in Task 3">
-                    Disabled
-                </button>
+                <a class="btn btn-primary w-100"
+                   asp-controller="Requests" asp-action="Index"
+                   aria-describedby="status-desc">Open</a>
+                <span id="status-desc" class="visually-hidden">Open Service Request Status</span>
             </div>
         </article>
     </div>
@@ -119,21 +119,6 @@
         .task-card--active:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 10px rgba(16,24,40,0.08);
-        }
-
-    .task-card--disabled {
-        background: #f8fafc;
-        color: #9aa4b2;
-        border-style: dashed;
-        border-color: #e5e7eb;
-        user-select: none;
-    }
-
-        .task-card--disabled .btn-disabled {
-            background: #e5e7eb;
-            color: #6b7280;
-            border-color: #e5e7eb;
-            cursor: not-allowed;
         }
 
     .badge {
