@@ -1,0 +1,43 @@
+﻿@model MunicipalityApp.Data.BasicTreeNode<string, MunicipalityApp.Models.IssueReport>
+@using MunicipalityApp.Models
+
+<li>
+    <div class="node-row">
+        <span class="node-key">@Model.Key</span>
+
+        @* Category nodes carry issues -> display count *@
+        @if (Model.Values.Count > 0)
+        {
+            <span class="badge bg-secondary badge-count">@Model.Values.Count</span>
+        }
+    </div>
+
+    @* If this node has issue values, list them *@
+    @if (Model.Values.Count > 0)
+    {
+        <ul class="list-unstyled mt-2">
+            @foreach (var it in Model.Values)
+            {
+                <li class="issue-line">
+                    <a asp-controller="Requests" asp-action="Details" asp-route-id="@it.Id" class="text-decoration-none">
+                        <strong>@it.Category</strong> — @it.Location
+                    </a>
+                    <div class="issue-meta">
+                        @it.CreatedAt.ToLocalTime():g • @it.Status
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+
+    @* Recurse into children (e.g., Status → Category) *@
+    @if (Model.Children.Count > 0)
+    {
+        <ul class="list-unstyled mt-2">
+            @foreach (var child in Model.Children)
+            {
+                @await Html.PartialAsync("_HierarchyNode", child)
+            }
+        </ul>
+    }
+</li>
