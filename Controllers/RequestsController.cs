@@ -102,7 +102,24 @@ namespace MunicipalityApp.Controllers
 
             // ---- Panels from analytics ----
             ViewBag.TopUrgent = _rx.TopUrgent(5);
-            ViewBag.WorkflowToResolved = _rx.WorkflowPath(currentForPath, IssueStatus.Resolved);
+
+            // Normalise the workflow path so it ALWAYS starts with the chosen status
+            var rawPath = _rx.WorkflowPath(currentForPath, IssueStatus.Resolved) ?? Array.Empty<IssueStatus>();
+            var pathList = rawPath.ToList();
+
+            // If analytics omitted the origin, prepend it.
+            if (pathList.Count == 0)
+            {
+                // No path found: still show the selected status (or Resolved if that's the filter)
+                pathList.Add(currentForPath);
+            }
+            else if (pathList[0] != currentForPath)
+            {
+                pathList.Insert(0, currentForPath);
+            }
+
+            ViewBag.WorkflowToResolved = pathList;
+
             ViewBag.DepartmentMst = _rx.DepartmentMst();
 
             // ---- Surface state ----
