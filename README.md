@@ -1,139 +1,146 @@
-
-Author
+MunicipalityApp — README
 Student: Steven Bomela / ST10304166
 Module: PROG7312 – The IIE
+Framework: ASP.NET Core MVC (.NET 8.0)
 
-MunicipalityApp — README
 1. Introduction
-MunicipalityApp(Nova) is a C# ASP.NET Core MVC application for PROG7312 – Task 2 (Implementation).
-It enables residents to report municipal service issues and browse local events/announcements with simple recommendations.
-This submission includes:
+MunicipalityApp (Nova) is a C# ASP.NET Core MVC web application developed for PROG7312 – Task 3 (Final PoE).
+It enables residents to:
+•	Report service issues (e.g., potholes, leaks, power outages).
+•	View local events & announcements (with recommendations).
+•	Track the status of service requests, powered by advanced data structures for efficient retrieval and analytics.
+This final submission includes:
 •	Part 1: Report Issues (fully implemented)
-•	Part 2: Local Events & Announcements (implemented with data structures + recommendations)
-•	Service Request Status: present as a page (for continuity/PoE), not required for Part 2 marks
+•	Part 2: Local Events & Announcements (with data structures + recommendations)
+•	Part 3: Service Request Status (advanced trees, heaps, graphs + MST)
 
-2. Getting the code (Git)
-Clone the Git repository  in vs 2022 or run the following on terminal:
+2. Getting the Code (Git)
+Clone the repository and open it in Visual Studio 2022 or .NET CLI:
 git clone https://github.com/VCCT-PROG7312-2025-G2/MunicipalityApp.git
 cd MunicipalityApp
 
 3. Prerequisites
-•	Windows 10/11
+•	Windows 10/11 or macOS/Linux
 •	.NET 8.0 SDK
-•	Visual Studio 2022 (Workloads: “.NET desktop development” and “ASP.NET and web development”)
-Optional: You may also run via the .NET CLI (no Visual Studio required).
+•	Visual Studio 2022 with workloads:
+o	“.NET desktop development”
+o	“ASP.NET and web development”
+Optional: You can also build/run using the .NET CLI.
 
 4. Build & Run
 Option A — Visual Studio 2022
 1.	Open MunicipalityApp.sln.
-2.	Ensure target framework is .NET 8.0.
-3.	Press F5 (Debug → Start Debugging).
-4.	The app will launch at a https://localhost:xxxx/ URL shown in the output.
-
+2.	Confirm Target Framework = .NET 8.0.
+3.	Press F5 → Start Debugging.
+4.	The app launches at https://localhost:xxxx/.
+Option B — . NET CLI
+dotnet restore
+dotnet build
+dotnet run
+Then open the printed URL (e.g. https://localhost:7100/) in your browser.
 
 5. Application Usage
 5.1 Main Menu
-•	Three options:
-o	Report Issues (active – Part 1)
-o	Local Events & Announcements (active – Part 2)
-o	Service Request Status (present for continuity; not required for Part 2)
-•	Accessible navbar and card-based landing: Views/Shared/_Layout.cshtml and Views/Home/Index.cshtml.
+Three accessible tiles on the home screen:
+•	Report Issues (active – Part 1)
+•	Local Events & Announcements (active – Part 2)
+•	Service Request Status (active – Part 3)
+Navigation implemented in
+Views/Shared/_Layout.cshtml and Views/Home/Index.cshtml.
+
 5.2 Report Issues (Part 1)
-Path: Issues → Create
-1.	Provide:
-o	Location (textbox)
-o	Category (dropdown: Sanitation, Roads, Water, Electricity, Refuse Collection, Other)
-o	Description (textarea, validated)
-2.	Attach files (multi-file): .jpg, .jpeg, .png, .gif, .pdf, .doc, .docx, .heic
-o	Limits: 10 MB per file, 20 MB total
-o	Safe handling: extension & MIME whitelist, magic-byte sniff, anti-forgery token, size checks
-o	Files are stored outside wwwroot under AppUploads/issues/yyyy/MM/dd/
-3.	Engagement: progress bar + encouraging messages as you complete fields.
-4.	Submit → Thanks page shows reference GUID, status badge/timeline, and download links for uploaded files.
+Path: /Issues/Create
+•	Fields: Location | Category | Description
+•	File upload: .jpg . jpeg . png . gif . pdf . doc . docx . heic
+•	Size limits: 10 MB per file, 20 MB total
+•	Safe handling: extension & MIME whitelist + magic-byte sniffing + anti-forgery
+•	Files stored outside wwwroot → AppUploads/issues/yyyy/MM/dd/
+•	Progress bar + helpful messages enhance user engagement.
+•	Upon submission: “Thank You” page shows Reference GUID + status timeline.
+
 5.3 Local Events & Announcements (Part 2)
-Path: Events → Index
-•	Filters: Category and Date (server-side)
-•	Sorting: by date (default), name, or category via querystring ?sort=
-•	Paging: page/size querystring, with accessible Previous/Next controls
+Path: /Events/Index
+•	Filters: Category + Date
+•	Sorting: by Date (default), Name, or Category
+•	Pagination (5–50 per page)
 •	Panels:
-o	Recommended categories (based on search frequency & co-occurrence)
-o	Recommended events (actual upcoming items inferred from your interest)
-o	Coming up (soonest events via priority queue)
-o	Recently viewed events
-•	Event details page: title, date/time, venue, category, description + back navigation
-Branding assets (already included):
-wwwroot/images/city-background.jpg, wwwroot/images/city-of-nova-logo.png
+o	Recommended categories (based on search frequency + co-occurrence)
+o	Recommended events (actual upcoming items)
+o	Coming Up (PriorityQueue)
+o	Recently Viewed (Stack)
+•	Details page: Title | Date/Time | Venue | Category | Description
+Branding assets:
+wwwroot/images/city-background.jpg and wwwroot/images/city-of-nova-logo.png.
 
-6. Data Structures (what and where)
-Part 1 (Issues) – no List/array for storage
-•	LinkedList<IssueReport> — in-memory store of submitted issues (Services/IssueStore.cs)
-•	Queue<AttachmentRef> — FIFO attachments per issue (Models/IssueReport.cs)
-•	SortedDictionary<string,int> — counts per category (IssueStore.CategoryCounts)
-Part 2 (Events & Announcements)
-•	SortedDictionary<DateOnly, List<EventItem>> — primary calendar-ordered index (Services/EventStore.cs)
-•	HashSet<string> — unique Categories (exposed to the UI)
-•	Queue<string> — recent searches (telemetry for recommendations)
-•	PriorityQueue<EventItem, DateTime> — soonest events (“Coming up” panel)
-•	Stack<Guid> — recently viewed event IDs (LIFO)
-•	Dictionary<Guid, EventItem> — fast byId lookup
-•	Dictionary<string,int> — categoryHits (frequency of interest)
-•	Dictionary<string, Dictionary<string,int>> — coHits for co-occurrence learning (related categories)
-All of the above are thread-safe via a private lock (_gate) in EventStore.
+5.4 Service Request Status (Part 3)
+Path: /Requests/Index
+This module demonstrates advanced data structures and analytics for request tracking:
+•	Filters:
+o	Search (Location / Description)
+o	Status (dropdown)
+o	Category (dropdown)
+o	Date range → AVL Tree
+o	Location range → BST (prefix-friendly filter)
+•	Sorting: Recent / Oldest / Status / Category
+•	Pagination: page & size controls
+•	Panels (right side):
+o	Most Urgent → Heap (priority queue)
+o	Workflow to Resolved → Graph + BFS
+o	Dept Connectivity (MST) → Kruskal Minimum Spanning Tree
+•	Hierarchy Tree View: Requests → Status → Category → Issues (Basic Tree)
 
-7. Security & File Handling (Part 1 detail)
-•	Whitelists: extensions (.jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.heic) + MIME types
-•	Limits: MaxEach = 10 MB, MaxTotal = 20 MB
-•	Magic-byte sniffing for common formats (JPEG/PNG/GIF/PDF)
-•	Storage: outside wwwroot in AppUploads/... (prevents direct HTTP access)
-•	Downloads: streamed through IssuesController.Download(id, fileId)
-•	Anti-forgery on form posts
+6. Data Structures and Their Roles
+Type	File(s)	Used For	Proof in UI
+LinkedList	Services/IssueStore.cs	Issue storage	Submit and track issues
+Queue	Models/IssueReport.cs	Attachment FIFO	Attachments per issue
+SortedDictionary	Services/IssueStore.cs	Category counts	Status filters
+SortedDictionary	Services/EventStore.cs	Events by date	Event listing
+HashSet	EventStore.cs	Unique categories	Category filter
+Stack	EventStore.cs	Recently viewed events	“Recently Viewed” panel
+PriorityQueue	EventStore.cs / RequestAnalytics.cs	Soonest events / Urgency	“Coming Up” & “Most Urgent” panels
+Dictionary	EventStore.cs	Hits & recommendations	Recommendations panel
+BST (Binary Search Tree)	Data/Bst.cs	Location range search	Loc From/To fields
+AVL Tree	Data/AvlTree.cs	Date range filter	From/To fields
+Red-Black Tree	Data/RedBlackTree.cs	Id index (lookups)	Request Details
+Heap	PriorityQueue<IssueReport,int>	Urgency ordering	“Most Urgent” panel
+Graph + BFS	Data/Graph.cs	Workflow path → Resolved	“Workflow to Resolved” panel
+MST (Kruskal)	Graph.KruskalMst()	Dept connectivity	“Dept Connectivity” panel
+Basic Tree	Data/BasicTree.cs	Hierarchy (Status → Category → Issues)	/Requests/Hierarchy view
+________________________________________
+7. Security & File Handling
+•	Whitelist: .jpg . jpeg . png . gif . pdf . doc . docx . heic
+•	MIME checks + magic-byte sniffing
+•	Anti-forgery tokens on form posts
+•	Stored outside wwwroot for safety
+•	Safe downloads via controller (streamed)
 
 8. Project Structure (key files)
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Controllers\EventsController.cs 
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Controllers\HomeController.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Controllers\IssuesController.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Controllers\RequestsController.cs
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Models\AttachmentRef.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Models\EventItem.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Models\IssueInput.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Models\IssueReport.cs
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Services\EventStore.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Services\IEventStore.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Services\IIssueStore.cs
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Services\IssueStore.cs
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Events\Details.cshtml
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Events\Index.cshtml
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Home\Index.cshtml
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Home\Privacy.cshtml
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Issues\Create.cshtml
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Issues\Thanks.cshtml
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Requests\Details.cshtml
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Requests\Index.cshtml
-
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Views\Shared\_Layout.cshtml
-C:\Users\Bomel\source\repos\MunicipalityApp-fork\Program.cs
+Controllers → IssuesController.cs, EventsController.cs, RequestsController.cs
+Data → AvlTree.cs, Bst.cs, RedBlackTree.cs, Graph.cs, BasicTree.cs
+Services → IssueStore.cs, EventStore.cs, RequestAnalytics.cs
+Views → Issues/, Events/, Requests/, Shared/_Layout.cshtml
+Infrastructure → DemoSeederExtensions.cs
+Entry point → Program.cs
 
 9. Known Limitations
-•	In-memory stores (events/issues) — data resets on restart.
-•	Attachments saved to filesystem (AppUploads/...) and are not virus-scanned.
-•	No authentication/authorization, notifications, or localization yet.
-•	Events are seeded on first use of the Events page.
+•	In-memory stores (reset on restart).
+•	No authentication or authorization.
+•	File uploads not virus-scanned (just validated).
+•	MST edges use simulated weights for demo purposes.
 
 10. References / Resources
-•	Microsoft Docs — ASP.NET Core MVC: https://learn.microsoft.com/aspnet/core/mvc
-•	Microsoft Docs — File uploads in ASP.NET Core: https://learn.microsoft.com/aspnet/core/mvc/models/file-uploads
-•	Microsoft Docs — Collections & Data Structures in .NET: https://learn.microsoft.com/dotnet/standard/collections
-•	Bootstrap 5: https://getbootstrap.com
+•	Microsoft Docs — ASP.NET Core MVC → https://learn.microsoft.com/aspnet/core/mvc
+•	Microsoft Docs — File Uploads → https://learn.microsoft.com/aspnet/core/mvc/models/file-uploads
+•	Microsoft Docs — Collections & Data Structures → https://learn.microsoft.com/dotnet/standard/collections
+•	Bootstrap 5 → https://getbootstrap.com
 
-11. AI Usage (declaration)
-I used ChatGPT (GPT ) to help structure the MVC solution, review data-structure choices (e.g., SortedDictionary, HashSet, Queue, PriorityQueue, Stack), and improve robustness of the file-upload flow (validation, size limits, magic-byte checks, anti-forgery). The generated suggestions were adapted and implemented by me, tested locally, and integrated into the final codebase. All domain logic and seeding data were designed to meet the PROG7312 Part 2 rubric, and I take responsibility for the final implementation and any changes made after AI assistance.
+11. AI Usage (Declaration)
+I used ChatGPT (GPT-5) to help refine the MVC structure, analyze data-structure choices (e.g., AVL, RBT, BST, Heap, Graph, MST), and improve the robustness of the file-upload and analytics logic. All suggestions were adapted and tested by me, and I take full responsibility for the final implementation.
+
+YouTube link: https://youtu.be/ZJf_I5WZUCw
+Github link: https://github.com/VCCT-PROG7312-2025-G2/MunicipalityApp.git
+
+
 
 
 
